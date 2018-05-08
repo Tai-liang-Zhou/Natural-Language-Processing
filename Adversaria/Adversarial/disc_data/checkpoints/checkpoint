@@ -1,0 +1,6 @@
+model_checkpoint_path: "D:\\NLP Program\\Adversaria\\Adversarial\\disc_data\\checkpoints\\disc.model-15600"
+all_model_checkpoint_paths: "D:\\NLP Program\\Adversaria\\Adversarial\\disc_data\\checkpoints\\disc.model-14000"
+all_model_checkpoint_paths: "D:\\NLP Program\\Adversaria\\Adversarial\\disc_data\\checkpoints\\disc.model-14400"
+all_model_checkpoint_paths: "D:\\NLP Program\\Adversaria\\Adversarial\\disc_data\\checkpoints\\disc.model-14800"
+all_model_checkpoint_paths: "D:\\NLP Program\\Adversaria\\Adversarial\\disc_data\\checkpoints\\disc.model-15200"
+all_model_checkpoint_paths: "D:\\NLP Program\\Adversaria\\Adversarial\\disc_data\\checkpoints\\disc.model-15600"
