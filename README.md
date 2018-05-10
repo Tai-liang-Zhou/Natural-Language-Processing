@@ -9,5 +9,6 @@ https://developer.nvidia.com/cuda-90-download-archive?target_os=Windows&target_a
 
 Downloads cuDNN v7.0 dll :<br/>
 https://developer.nvidia.com/cudnn
+![](https://github.com/Tai-liang-Zhou/Natural-Language-Processing/blob/master/2018-05-10_150151.png)
 
 ***Ensure that you add the directory where you installed the cuDNN DLL to your %PATH% environment variable.***
