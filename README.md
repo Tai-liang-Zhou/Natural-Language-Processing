@@ -33,4 +33,6 @@ import tensorflow as tf  
 hello = tf.constant('Hello, TensorFlow!') 
 sess = tf.Session()  
 print(sess.run(hello))  
-```
+```  
+**5. 最後執行 Anaconda Navigator 改變環境執行你要的IDE <br/>**
+![](https://github.com/Tai-liang-Zhou/Natural-Language-Processing/blob/master/2018-05-11_171331.png)<br/>
