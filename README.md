@@ -9,8 +9,10 @@ https://developer.nvidia.com/cuda-90-download-archive?target_os=Windows&target_a
 ## Downloads cuDNN v7.0 dll :<br/> ##
 https://developer.nvidia.com/cudnn
 ![](https://github.com/Tai-liang-Zhou/Natural-Language-Processing/blob/master/2018-05-10_150151.png)
-***Ensure that you add the directory where you installed the cuDNN DLL to your %PATH% environment variable. *** <br/>
-***解壓縮 cuDNN 後將以下檔案直接覆蓋到 (預設路徑) C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.0 ***  <br/>
+***確定環境變數名稱 `PATHEXT`裡包含 `.DLL` <br/>***
+對本機右鍵->內容->變更設定->系統內容(進階)->環境變數->`PATHEXT`
+![](https://github.com/Tai-liang-Zhou/Natural-Language-Processing/blob/master/2018-05-10_150151.png)
+***解壓縮 cuDNN 後將以下檔案直接覆蓋到 (預設路徑) C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.0 <br/>***
 ![](https://github.com/Tai-liang-Zhou/Natural-Language-Processing/blob/master/2018-05-10_165850.png)<br/>
 ![](https://github.com/Tai-liang-Zhou/Natural-Language-Processing/blob/master/2018-05-11_171331.png)<br/>
 ## 下載 Anaconda windows10_64 python 3.6 version :<br/> ##
