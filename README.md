@@ -18,3 +18,7 @@ https://repo.anaconda.com/archive/Anaconda3-5.1.0-Windows-x86_64.exe 第一次�
 
 **Anaconda裡也支援vscode囉! 可以自行決定要不要安裝<br/>**
 ![](https://github.com/Tai-liang-Zhou/Natural-Language-Processing/blob/master/2018-05-10_152212.png)
+
+## 在Anaconda 裡面安裝python 與設定 tensorflow 環境<br/> ##
+***用以下指令創建一個conda 的工作環境叫做 "tensorflow"***
+conda create -n tensorflow pip python=3.5 // conda
