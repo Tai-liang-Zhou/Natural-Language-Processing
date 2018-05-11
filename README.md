@@ -27,7 +27,12 @@ https://repo.anaconda.com/archive/Anaconda3-5.1.0-Windows-x86_64.exe 第一次�
 **3. 用以下指令安裝 gpu版本的 tensorflow ** <br/>
 `pip install --ignore-installed --upgrade tensorflow-gpu` <br/>
 **4. 執行程式碼表示驗證成功 ** <br/>
-`import tensorflow as tf  
-hello = tf.constant('Hello, TensorFlow!')  
+```
+import tensorflow as tf  
+
+hello = tf.constant('Hello, TensorFlow!') 
+
 sess = tf.Session()  
-print(sess.run(hello))  `
+
+print(sess.run(hello))  
+```
