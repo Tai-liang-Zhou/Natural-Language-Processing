@@ -20,12 +20,12 @@ https://repo.anaconda.com/archive/Anaconda3-5.1.0-Windows-x86_64.exe 第一次�
 ![](https://github.com/Tai-liang-Zhou/Natural-Language-Processing/blob/master/2018-05-10_152212.png)<br/>
 
 ## 在Anaconda 裡面安裝python 與設定 tensorflow 環境 :<br/> ##
-**1. 用以下指令創建一個 conda 的工作環境叫做 "tensorflow"**<br/>
-```conda create -n tensorflow pip python=3.5```  
-**2. 用以下指令啟用 conda tensorflow 環境** <br/>
-````activate tensorflow````  <br/>
+**1. 用以下指令創建一個 conda 的工作環境叫做 "tensorflow" **<br/>
+```conda create -n tensorflow pip python=3.5 ```  <br/>
+**2. 用以下指令啟用 conda tensorflow 環境 ** <br/>
+```activate tensorflow```  <br/>
 **3. 用以下指令安裝 gpu版本的 tensorflow ** <br/>
-````pip install --ignore-installed --upgrade tensorflow-gpu```` <br/>
+```pip install --ignore-installed --upgrade tensorflow-gpu``` <br/>
 **4. 執行程式碼表示驗證成功 ** <br/>
 ```
 import tensorflow as tf  
