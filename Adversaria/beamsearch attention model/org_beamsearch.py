@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Nov  6 23:44:22 2018
-
-@author: tom
-"""
-
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.layers import core as layers_core
@@ -20,11 +13,8 @@ hparams = tf.contrib.training.HParams(
     learning_rate = 0.01,
     max_gradient_norm = 5.0,
     beam_width =9,
-    use_attention = True,
+    use_attention = False,
 )
-
-
-testing_mode = True
 
 # Symbol for start decode process.
 tgt_sos_id = 7
@@ -39,7 +29,6 @@ tf.reset_default_graph()
 #   encoder_inputs: [encoder_length, batch_size]
 #   This is time major where encoder_length comes first instead of batch_size.
 encoder_inputs = tf.placeholder(tf.int32, shape=(hparams.encoder_length, hparams.batch_size), name="encoder_inputs")
-_encoder_length = tf.placeholder(tf.int32, [None], name="encoder_length")
 
 # Embedding
 #   Matrix for embedding: [src_vocab_size, embedding_size]
@@ -99,28 +88,23 @@ if hparams.use_attention:
   # Attention
   # attention_states: [batch_size, max_time, num_units]
   attention_states = tf.transpose(encoder_outputs, [1, 0, 2])
-  
-  if (testing_mode == True):
-      attention_states = tf.contrib.seq2seq.tile_batch(attention_states, multiplier=hparams.beam_width)
-      encoder_state = tf.contrib.seq2seq.tile_batch(encoder_state, multiplier=hparams.beam_width)
-      tiled_sequence_length = tf.contrib.seq2seq.tile_batch(_encoder_length, multiplier=hparams.beam_width)
 
   # Create an attention mechanism
   attention_mechanism = tf.contrib.seq2seq.LuongAttention(
       hparams.num_units, attention_states,
       memory_sequence_length=None)
 
-  decoder_cell_ = tf.contrib.seq2seq.AttentionWrapper(
+  decoder_cell = tf.contrib.seq2seq.AttentionWrapper(
       decoder_cell, attention_mechanism,
       attention_layer_size=hparams.num_units)
 
-  initial_state = decoder_cell_.zero_state(hparams.batch_size, tf.float32).clone(cell_state=encoder_state)
+  initial_state = decoder_cell.zero_state(hparams.batch_size, tf.float32).clone(cell_state=encoder_state)
 else:
   initial_state = encoder_state
 
 # Decoder and decode
 decoder = tf.contrib.seq2seq.BasicDecoder(
-    decoder_cell_, helper, initial_state,
+    decoder_cell, helper, initial_state,
     output_layer=projection_layer)
 
 # Dynamic decoding
@@ -138,7 +122,6 @@ print("final_sequence_lengths.shape=", _final_sequence_lengths.shape)
 
 logits = final_outputs.rnn_output
 
-
 # Target labels
 #   As described in doc for sparse_softmax_cross_entropy_with_logits,
 #   labels should be [batch_size, decoder_lengths] instead of [batch_size, decoder_lengths, tgt_vocab_size].
@@ -148,7 +131,6 @@ target_labels = tf.placeholder(tf.int32, shape=(hparams.batch_size, hparams.deco
 # Loss
 loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
     labels=target_labels, logits=logits)
-
 
 # Train
 global_step = tf.Variable(0, name='global_step', trainable=False)
@@ -222,7 +204,7 @@ inference_helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(
 
 # Inference Decoder
 inference_decoder = tf.contrib.seq2seq.BasicDecoder(
-    decoder_cell_, inference_helper, initial_state,
+    decoder_cell, inference_helper, initial_state,
     output_layer=projection_layer)
 
 
@@ -237,65 +219,37 @@ translations = outputs.sample_id
 
 # Input tweets
 inference_encoder_inputs = np.empty((hparams.encoder_length, hparams.batch_size))
-encoder_length_ = np.ones(hparams.batch_size)*100
-len(inference_encoder_inputs)
 inference_encoder_inputs[:, 0] = tweet1
 inference_encoder_inputs[:, 1] = tweet2
 inference_encoder_inputs[:, 2] = tweet1
 
 feed_dict = {
     encoder_inputs: inference_encoder_inputs,
-    _encoder_length: encoder_length_
 }
 
 replies = sess.run([translations], feed_dict=feed_dict)
 print(replies)
 
 # Beam Search
-#-------------------------------------------
-
-
-#decoder_cell_ = tf.nn.rnn_cell.BasicLSTMCell(hparams.num_units)
-encoder_outputs_ = tf.transpose(encoder_outputs, [1, 0, 2])
-
-tiled_encoder_outputs = tf.contrib.seq2seq.tile_batch(encoder_outputs_, multiplier=hparams.beam_width)
-tiled_encoder_final_state = tf.contrib.seq2seq.tile_batch(encoder_state, multiplier=hparams.beam_width)
-tiled_sequence_length = tf.contrib.seq2seq.tile_batch(encoder_length_, multiplier=hparams.beam_width)
-
-beamsearch_attention = tf.contrib.seq2seq.LuongAttention(
-      num_units = hparams.num_units, 
-      memory = tiled_encoder_outputs,
-      memory_sequence_length=tiled_sequence_length)
-#_decoder_cell = tf.nn.rnn_cell.BasicLSTMCell(hparams.num_units)
-attention_cell  = tf.contrib.seq2seq.AttentionWrapper(
-      decoder_cell, 
-      beamsearch_attention,
-      attention_layer_size=hparams.num_units)
-decoder_initial_state = attention_cell.zero_state(dtype=tf.float32, batch_size=batch_size)
-decoder_initial_state = decoder_initial_state.clone(cell_state=tiled_encoder_final_state)
-#-------------------------------------------
-
 # Replicate encoder infos beam_width times
-#decoder_initial_state = tf.contrib.seq2seq.tile_batch(initial_state[0], multiplier=hparams.beam_width)
+decoder_initial_state = tf.contrib.seq2seq.tile_batch(
+    initial_state, multiplier=hparams.beam_width)
 
 # Define a beam-search decoder
-
 inference_decoder = tf.contrib.seq2seq.BeamSearchDecoder(
         cell=decoder_cell,
         embedding=embedding_decoder,
         start_tokens=tf.fill([hparams.batch_size], tgt_sos_id),
         end_token=tgt_eos_id,
-        initial_state=decoder_initial_state[0],
+        initial_state=decoder_initial_state,
         beam_width=hparams.beam_width,
         output_layer=projection_layer,
         length_penalty_weight=0.0)
 
 # Dynamic decoding
 outputs, _, _ = tf.contrib.seq2seq.dynamic_decode(
-    inference_decoder,impute_finished = False, maximum_iterations=maximum_iterations)
+    inference_decoder, maximum_iterations=maximum_iterations)
 translations = outputs.predicted_ids
 
-sess = tf.Session()
-sess.run(tf.global_variables_initializer())
 replies = sess.run([translations], feed_dict=feed_dict)
 print(replies)
