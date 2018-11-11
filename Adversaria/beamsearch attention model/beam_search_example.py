@@ -12,12 +12,16 @@ hparams = tf.contrib.training.HParams(
     tgt_vocab_size=9,
     learning_rate = 0.01,
     max_gradient_norm = 5.0,
-    beam_width =9,
+    beam_width =3,
     use_attention = True,
 )
-
+#%%
+testing_mode = False
+model_train = True
+#%%
 testing_mode = True
 model_train = False
+#%%
 # For debug purpose.
 tf.reset_default_graph()
 # Symbol for start decode process.
@@ -156,8 +160,8 @@ if model_train == True:
     #optimizer = tf.train.GradientDescentOptimizer(hparams.learning_rate)
     #train_op = optimizer.minimize(loss, global_step=global_step)
 else:
-    source_sequence_length = hparams.encoder_length
-    maximum_iterations = tf.round(tf.reduce_max(source_sequence_length) * 2)
+#    source_sequence_length = hparams.encoder_length
+#    maximum_iterations = tf.round(tf.reduce_max(source_sequence_length) * 2)
     inference_decoder = tf.contrib.seq2seq.BeamSearchDecoder(
         cell=decoder_cell,
         embedding=embedding_decoder,
@@ -169,7 +173,7 @@ else:
         length_penalty_weight=0.0)
         # Dynamic decoding
     outputs, _, _ = tf.contrib.seq2seq.dynamic_decode(
-            inference_decoder, maximum_iterations=maximum_iterations)
+            inference_decoder, maximum_iterations=10)
     translations = outputs.predicted_ids
 #%%
 sess = tf.Session()
@@ -178,48 +182,53 @@ sess.run(tf.global_variables_initializer())
 # Training data.
 #%%
 # Tweet
-tweet1 = np.array([1, 2, 3, 4])
-tweet2 = np.array([0, 5, 6, 3])
 
-# Make batch data.
-train_encoder_inputs = np.empty((hparams.encoder_length, hparams.batch_size))
-train_encoder_inputs[:, 0] = tweet1
-train_encoder_inputs[:, 1] = tweet2
-train_encoder_inputs[:, 2] = tweet1
-print("問題")
-print(train_encoder_inputs)
-
-# Reply
-training_decoder_input1 = [tgt_sos_id, 2, 3, 4, 5]
-training_decoder_input2 = [tgt_sos_id, 5, 6, 4, 3]
-
-training_target_label1 = [2, 3, 4, 5, tgt_eos_id]
-training_target_label2 = [5, 6, 4, 3, tgt_eos_id]
-
-training_target_labels = np.empty((hparams.batch_size, hparams.decoder_length))
-training_target_labels[0] = training_target_label1
-training_target_labels[1] = training_target_label2
-training_target_labels[2] = training_target_label1
-print("回答")
-print(training_target_labels)
-
-training_decoder_inputs = np.empty((hparams.decoder_length, hparams.batch_size))
-training_decoder_inputs[:, 0] = training_decoder_input1
-training_decoder_inputs[:, 1] = training_decoder_input2
-training_decoder_inputs[:, 2] = training_decoder_input1
-print(training_decoder_inputs)
-
-feed_dict = {
-    encoder_inputs: train_encoder_inputs,
-    target_labels: training_target_labels,
-    decoder_inputs: training_decoder_inputs,
-    decoder_lengths: np.ones((hparams.batch_size), dtype=int) * hparams.decoder_length
-}
-
-# Train
-for i in range(100):
-    _, loss_value = sess.run([train_op, loss], feed_dict=feed_dict)
-    print('loss :', loss_value)
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
+    tweet1 = np.array([1, 2, 3, 4])
+    tweet2 = np.array([0, 5, 6, 3])
+    
+    # Make batch data.
+    train_encoder_inputs = np.empty((hparams.encoder_length, hparams.batch_size))
+    train_encoder_inputs[:, 0] = tweet1
+    train_encoder_inputs[:, 1] = tweet2
+    train_encoder_inputs[:, 2] = tweet1
+    print("問題")
+    print(train_encoder_inputs)
+    
+    # Reply
+    training_decoder_input1 = [tgt_sos_id, 2, 3, 4, 5]
+    training_decoder_input2 = [tgt_sos_id, 5, 6, 4, 3]
+    
+    training_target_label1 = [2, 3, 4, 5, tgt_eos_id]
+    training_target_label2 = [5, 6, 4, 3, tgt_eos_id]
+    
+    training_target_labels = np.empty((hparams.batch_size, hparams.decoder_length))
+    training_target_labels[0] = training_target_label1
+    training_target_labels[1] = training_target_label2
+    training_target_labels[2] = training_target_label1
+    print("回答")
+    print(training_target_labels)
+    
+    training_decoder_inputs = np.empty((hparams.decoder_length, hparams.batch_size))
+    training_decoder_inputs[:, 0] = training_decoder_input1
+    training_decoder_inputs[:, 1] = training_decoder_input2
+    training_decoder_inputs[:, 2] = training_decoder_input1
+    print(training_decoder_inputs)
+    
+    feed_dict = {
+        encoder_inputs: train_encoder_inputs,
+        target_labels: training_target_labels,
+        decoder_inputs: training_decoder_inputs,
+        decoder_lengths: np.ones((hparams.batch_size), dtype=int) * hparams.decoder_length
+    }
+    
+    # Train
+    for i in range(100):
+        _, loss_value = sess.run([train_op, loss], feed_dict=feed_dict)
+        print('loss :', loss_value)
+        
+        
 #%%
 # Inference
 inference_helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(
@@ -250,6 +259,7 @@ inference_encoder_inputs[:, 2] = tweet1
 
 feed_dict = {
     encoder_inputs: inference_encoder_inputs,
+    _encoder_length:encoder_length_
 }
 
 replies = sess.run([translations], feed_dict=feed_dict)
@@ -278,8 +288,16 @@ decoder_initial_state = tf.contrib.seq2seq.tile_batch(initial_state, multiplier=
 #    inference_decoder, maximum_iterations=maximum_iterations)
 #translations = outputs.predicted_ids
 #
-
-model_train = False
-testing_mode = True
-replies = sess.run([translations], feed_dict=feed_dict)
-print(replies)
+inference_encoder_inputs = np.empty((hparams.encoder_length, hparams.batch_size))
+encoder_length_ = np.ones(hparams.batch_size)*4
+inference_encoder_inputs[:, 0] = tweet1
+inference_encoder_inputs[:, 1] = tweet2
+inference_encoder_inputs[:, 2] = tweet1
+feed_dict = {
+    encoder_inputs: inference_encoder_inputs,
+    _encoder_length:encoder_length_
+}
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
+    replies = sess.run([translations], feed_dict=feed_dict)
+    print(replies)
