@@ -23,12 +23,9 @@ model_train = True
 tf.reset_default_graph()
 # Symbol for start decode process.
 tgt_sos_id = 7
-
 # Symbol for end of decode process.
 tgt_eos_id = 8
-
-
-
+#%%
 # Encoder
 #   encoder_inputs: [encoder_length, batch_size]
 #   This is time major where encoder_length comes first instead of batch_size.
@@ -175,7 +172,6 @@ else:
 
 #%%
 # Tweet
-
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
@@ -229,13 +225,6 @@ model_train = False
 #%%
 # For debug purpose.
 tf.reset_default_graph()
-# Symbol for start decode process.
-tgt_sos_id = 7
-
-# Symbol for end of decode process.
-tgt_eos_id = 8
-
-
 
 # Encoder
 #   encoder_inputs: [encoder_length, batch_size]
